@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MiniShop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>🛒 MiniShop</h1>
+
+  <section>
+    <h2>Add Product</h2>
+    <input id="name" placeholder="Product name" />
+    <input id="price" placeholder="Price" type="number" />
+    <button onclick="addProduct()">Add</button>
+  </section>
+
+  <section>
+    <h2>Products</h2>
+    <button onclick="loadProducts()">Refresh</button>
+    <ul id="products"></ul>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
