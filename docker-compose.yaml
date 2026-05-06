@@ -48,7 +48,7 @@ services:
     env_file:
       - .env
     volumes:
-      - mongo-data:/data/db
+      - mongo-data:/database/init.js
       - ./mongo-init:/docker-entrypoint-initdb.d
     logging:
       driver: "json-file"
