@@ -7,9 +7,9 @@ from app.routes import products, users
 
 app = FastAPI(title="MiniShop API")
 
-# =========================
-# í´¹ Prometheus Metrics
-# =========================
+
+# Prometheus Metrics
+
 
 REQUEST_COUNT = Counter(
     "http_requests_total",
@@ -28,9 +28,9 @@ IN_PROGRESS = Gauge(
     "Number of in-progress requests"
 )
 
-# =========================
-# í´¹ Middleware
-# =========================
+
+# Middleware
+
 
 @app.middleware("http")
 async def metrics_middleware(request: Request, call_next):
@@ -56,9 +56,9 @@ async def metrics_middleware(request: Request, call_next):
 
     return response
 
-# =========================
-# í´¹ Routes
-# =========================
+
+# Routes
+
 
 @app.get("/health")
 def health_check():
@@ -70,3 +70,33 @@ def metrics():
 
 app.include_router(products.router, prefix="/products", tags=["Products"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
+
+
+#  SIMPLE BUILT-IN TESTS (FOR DEMO / CI PURPOSE ONLY)
+
+
+def run_basic_tests():
+    """
+    Simple smoke tests for CI/CD validation
+    Run manually or inside CI pipeline
+    """
+    from fastapi.testclient import TestClient
+
+    client = TestClient(app)
+
+    # Test 1: Health check
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+    # Test 2: Metrics endpoint
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    assert "http_requests_total" in response.text
+
+    print(" All basic tests passed!")
+
+
+# Optional manual trigger
+if __name__ == "__main__":
+    run_basic_tests()
