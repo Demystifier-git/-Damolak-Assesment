@@ -1,0 +1,10 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: email-alert
+    receivers:
+      - uid: email
+        type: email
+        settings:
+          addresses: "delightdavid1234@gmail.com"

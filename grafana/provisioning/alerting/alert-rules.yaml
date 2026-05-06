@@ -1,0 +1,25 @@
+apiVersion: 1
+
+groups:
+  - name: backend-alerts
+    interval: 30s
+    rules:
+
+      - uid: backend-down
+        title: Backend Down
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: up{job="backend"} == 0
+              refId: A
+
+        for: 1m
+
+        annotations:
+          summary: "Backend is down"
+          description: "No running backend instances detected"
+
+        labels:
+          severity: critical
