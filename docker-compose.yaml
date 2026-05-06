@@ -3,7 +3,9 @@ version: "3.8"
 services:
 
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: backend
     restart: unless-stopped
     ports:
@@ -24,7 +26,9 @@ services:
         max-file: "3"
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: frontend
     restart: unless-stopped
     ports:
