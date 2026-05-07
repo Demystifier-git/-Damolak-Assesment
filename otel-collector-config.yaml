@@ -8,15 +8,30 @@ processors:
   batch:
 
 exporters:
+
   prometheus:
     endpoint: "0.0.0.0:8889"
 
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+
   logging:
-    loglevel: info
+    verbosity: detailed
 
 service:
   pipelines:
+
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [prometheus, logging]
+      exporters: [prometheus]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [loki]
+
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
