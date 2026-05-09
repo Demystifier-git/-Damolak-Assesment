@@ -63,7 +63,7 @@ module "ec2" {
   source = "./modules/ec2"
 
   name          = "web-server"
-  instance_type = "t3.micro"
+  
 
   # EC2 expects ONE subnet
   subnet_id = module.subnets.private_subnet_ids[0]
@@ -72,6 +72,7 @@ module "ec2" {
 
   ami       = var.ec2_ami
   instance_type = var.instance_type
+  key_name = null
 }
 
 # Load Balancer + SSL
@@ -109,7 +110,7 @@ module "ec2_asg" {
   security_group_ids  = [module.web_sg.sg_id]
   target_group_arn    = module.lb_ssl.target_group_arn
 
-  key_name            = var.key_name
+  key_name            = null
   ec2_ami             = var.ec2_ami
   instance_type       = var.instance_type
 
