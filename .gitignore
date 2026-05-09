@@ -9,3 +9,12 @@ terraform.state
 *.tfstate.*
 terraform.tfvars
 .terraform.lock.hcl
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform/.terraform.lock.hcl
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
