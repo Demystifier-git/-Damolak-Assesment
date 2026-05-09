@@ -60,24 +60,41 @@ variable "min_size" {
   type = number
 }
 
-variable "docdb_username" {
-  type = string
+
+variable "db_username" {
+  description = "Master username for the RDS database"
+  type        = string
+  sensitive   = true
 }
 
-variable "docdb_password" {
-  type = string
-  sensitive = true
+variable "db_password" {
+  description = "Master password for the RDS database"
+  type        = string
+  sensitive   = true
 }
 
-variable "docdb_instance_class" {
-  type = string
+variable "db_engine_version" {
+  description = "MySQL engine version for the RDS instance"
+  type        = string
 }
 
-variable "docdb_instance_count" {
-  type = number
+variable "db_instance_class" {
+  description = "RDS instance class"
+  type        = string
+}
+
+variable "db_allocated_storage" {
+  description = "Allocated storage for the RDS instance in GB"
+  type        = number
+}
+
+variable "db_sg_name" {
+  description = "Name of the database security group"
+  type        = string
+  default     = "db-new"
 }
 
 variable "db_name" {
-  type = string
+  description = "Name of database"
+  type        = string
 }
-

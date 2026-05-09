@@ -82,16 +82,4 @@ output "asg_launch_template_id" {
 }
 
 
-# DOCUMENTDB
 
-output "docdb_cluster_endpoint" {
-  value = module.documentdb.cluster_endpoint
-}
-
-output "docdb_reader_endpoint" {
-  value = module.documentdb.reader_endpoint
-}
-
-output "docdb_security_group_id" {
-  value = module.documentdb.security_group_id
-}

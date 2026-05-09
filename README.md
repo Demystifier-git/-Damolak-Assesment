@@ -90,7 +90,7 @@ https://delightdavid.online
 - Collects HTTP request stats, latency, and system metrics
 
 URL:
-http://prometheus.delightdavid.online
+https://prometheus.delightdavid.online
 
 ---
 

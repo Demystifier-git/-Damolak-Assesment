@@ -119,22 +119,27 @@ module "ec2_asg" {
   min_size            = var.min_size
 }
 
-# DocumentDB
-module "documentdb" {
-  source = "./modules/documentdb"
 
-  vpc_id = module.vpc.vpc_id
+module "db_sg" {
+  source         = "./modules/security-group-db"
+  vpc_id         = module.vpc.vpc_id
+  sg_name        = "db-new"
+  allowed_sg_ids = [module.web_sg.sg_id]
+}
 
-  subnet_ids = module.subnets.private_subnet_ids
 
-  # Allow EC2 SG access to DocumentDB
-  allowed_sg_id = module.web_sg.sg_id
+# RDS
+module "rds" {
+  source = "./modules/rds"
 
-  db_name = var.db_name
+  name               = "mysql-db"
+  db_name            = var.db_name
+  username           = var.db_username
+  password           = var.db_password
+  subnet_ids         = module.subnets.private_subnet_ids
+  security_group_ids = [module.db_sg.sg_id]
 
-  master_username = var.docdb_username
-  master_password = var.docdb_password
-
-  instance_class = var.docdb_instance_class
-  instance_count = var.docdb_instance_count
+  engine_version    = var.db_engine_version
+  instance_class    = var.db_instance_class
+  allocated_storage = var.db_allocated_storage
 }
