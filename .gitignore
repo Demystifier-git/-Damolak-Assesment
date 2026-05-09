@@ -1,2 +1,11 @@
 .env
-test-key.pem
+
+terraform.tfvars
+.terraform
+terraform/.terraform.lock.hcl
+terraform.state
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+.terraform.lock.hcl
