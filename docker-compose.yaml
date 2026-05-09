@@ -23,7 +23,7 @@ services:
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
 
     depends_on:
-      - mongodb
+      
       - otel-collector
 
     healthcheck:
@@ -55,24 +55,9 @@ services:
     logging:
       <<: *default-logging
 
-  mongodb:
-    image: mongo:6
+  
 
-    container_name: mongodb
-    restart: unless-stopped
-
-    env_file:
-      - .env
-
-    volumes:
-      - mongo-data:/data/db
-      - ./database/init.js:/docker-entrypoint-initdb.d/init.js
-
-    expose:
-      - "27017"
-
-    logging:
-      <<: *default-logging
+    
 
   prometheus:
     image: prom/prometheus:v2.52.0

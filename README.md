@@ -9,10 +9,12 @@ MiniShop is a containerized full-stack application designed to demonstrate real-
 - Docker-based microservice-style architecture
 - CI/CD-ready structure
 - Observability (metrics, logs, tracing)
-- Monitoring with Prometheus and Grafana
+- Monitoring with Prometheus and Grafana (otel-collector added to export metrics to prometheus)
 - Centralized logging with Loki + Promtail
 - Backend instrumentation using FastAPI middleware
-- MongoDB persistence
+- Amazon documentdb for data persistence
+- ACM to get ssl certificate for https configuration
+
 
 ---
 
@@ -42,7 +44,7 @@ VM (Docker Host)
 Static website served via Nginx.
 
 URL:
-http://<VM-IP>
+https://delightdavid.online
 
 ---
 
@@ -70,7 +72,7 @@ POST /users/login
 GET  /users/me
 
 Base URL:
-http://<VM-IP>:8000
+https://delightdavid.online
 
 ---
 
@@ -88,7 +90,7 @@ http://<VM-IP>:8000
 - Collects HTTP request stats, latency, and system metrics
 
 URL:
-http://<VM-IP>:9090
+http://prometheus.delightdavid.online
 
 ---
 
@@ -98,7 +100,7 @@ http://<VM-IP>:9090
 - Displays logs from Loki
 
 URL:
-http://<VM-IP>:3001
+https://grafana.delightdavid.online
 
 ---
 
@@ -151,11 +153,9 @@ docker compose up --build
 
 #  Access URLs
 
-Frontend:     http://<VM-IP>  
-Backend:      http://<VM-IP>:8000  
-Metrics:      http://<VM-IP>:8000/metrics  
-Prometheus:   http://<VM-IP>:9090  
-Grafana:      http://<VM-IP>:3001  
+Application:     https://delightdavid.online
+Prometheus:   https://prometheus.delightdavid.online 
+Grafana:      http://grafana.delightdavid.online 
 
 ---
 
@@ -166,6 +166,13 @@ The backend exposes the following Prometheus metrics:
 - http_requests_total
 - http_request_duration_seconds
 - in_progress_requests
+
+#  CI/CD
+
+
+- Build
+- test
+- deploy
 
 ---
 
@@ -193,15 +200,7 @@ Example LogQL query:
 
 ---
 
-#  Environment Variables
 
-MONGO_INITDB_ROOT_USERNAME=admin
-MONGO_INITDB_ROOT_PASSWORD=password
-MONGO_DB_NAME=minishop
-
-MONGO_URI=mongodb://admin:password@mongodb:27017/minishop?authSource=admin
-
----
 
 #  DevOps Concepts Demonstrated
 
@@ -213,6 +212,7 @@ MONGO_URI=mongodb://admin:password@mongodb:27017/minishop?authSource=admin
 - Centralized logging (Loki + Promtail)
 - FastAPI middleware instrumentation
 - Production-style architecture design
+- Autoscaling implemented
 
 ---
 
@@ -229,6 +229,6 @@ This project simulates a production-grade DevOps environment with:
 
 #  Author
 
-DevOps Engineer Practical Challenge Submission
+Chukwuagoziem delight david, DevOps Engineer Practical Challenge Submission.
 
 
