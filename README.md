@@ -208,11 +208,13 @@ Example LogQL query:
 - Multi-service orchestration
 - Observability (metrics, logs, traces)
 - Prometheus monitoring
-- Grafana dashboards
+- Grafana visualization
 - Centralized logging (Loki + Promtail)
 - FastAPI middleware instrumentation
 - Production-style architecture design
 - Autoscaling implemented
+- Infrastructure provisioned with terrafrom with remotestate backend configured
+- https configured for application as well as prometheus and grafana
 
 ---
 
