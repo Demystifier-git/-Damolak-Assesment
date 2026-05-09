@@ -70,8 +70,8 @@ module "ec2" {
 
   security_group_ids = [module.web_sg.sg_id]
 
-  key_name = var.key_name
   ami       = var.ec2_ami
+  instance_type = var.instance_type
 }
 
 # Load Balancer + SSL
