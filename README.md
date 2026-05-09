@@ -193,7 +193,7 @@ Example LogQL query:
 
 #  Security Notes
 
-- MongoDB credentials stored in environment variables
+- Amazondocumentdb was used as the database with env variables stored in secret manager
 - Internal Docker networking used for service communication
 - No direct public exposure of Loki or internal services
 - Observability stack accessed via Grafana only
@@ -206,7 +206,7 @@ Example LogQL query:
 
 - Docker containerization
 - Multi-service orchestration
-- Observability (metrics, logs, traces)
+- Observability (metrics, logs)
 - Prometheus monitoring
 - Grafana visualization
 - Centralized logging (Loki + Promtail)
@@ -215,6 +215,8 @@ Example LogQL query:
 - Autoscaling implemented
 - Infrastructure provisioned with terrafrom with remotestate backend configured
 - https configured for application as well as prometheus and grafana
+- Loadbalancer configured to route application traffic
+- 
 
 ---
 
