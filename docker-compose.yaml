@@ -10,8 +10,8 @@ services:
     container_name: backend
     restart: unless-stopped
 
-    ports:
-      - "8000:8000"
+    expose:
+    - "8000"
 
     env_file:
       - .env
@@ -46,8 +46,8 @@ services:
     container_name: frontend
     restart: unless-stopped
 
-    ports:
-      - "80:80"
+    expose:
+    - "80"
 
     depends_on:
       - backend
@@ -68,8 +68,8 @@ services:
       - mongo-data:/data/db
       - ./database/init.js:/docker-entrypoint-initdb.d/init.js
 
-    ports:
-      - "27017:27017"
+    expose:
+      - "27017"
 
     logging:
       <<: *default-logging
@@ -80,8 +80,8 @@ services:
     container_name: prometheus
     restart: unless-stopped
 
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
 
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
@@ -98,8 +98,8 @@ services:
     container_name: grafana
     restart: unless-stopped
 
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
 
     env_file:
       - .env
@@ -143,8 +143,8 @@ services:
     container_name: loki
     restart: unless-stopped
 
-    ports:
-      - "3100:3100"
+    expose:
+      - "3100"
 
     command: -config.file=/etc/loki/loki-config.yaml
 
@@ -186,10 +186,10 @@ services:
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
 
-    ports:
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
-      - "8889:8889"   # Prometheus Metrics Exporter
+    expose:
+      - "4317"
+      - "4318"
+      - "8889"
 
     depends_on:
       - prometheus
