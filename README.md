@@ -216,7 +216,7 @@ Example LogQL query:
 - Infrastructure provisioned with terrafrom with remotestate backend configured
 - https configured for application as well as prometheus and grafana
 - Loadbalancer configured to route application traffic
-- 
+- VPC setup for secure Networking
 
 ---
 
