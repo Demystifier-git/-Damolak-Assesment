@@ -81,5 +81,19 @@ output "asg_launch_template_id" {
   value = module.ec2_asg.launch_template_id
 }
 
+output "ecr_repository_url" {
+  value = module.ecr.repository_url
+}
 
+output "ecr_repository_arn" {
+  value = module.ecr.repository_arn
+}
+
+output "secret_arn" {
+  value = module.app_secret.secret_arn
+}
+
+output "secret_name" {
+  value = module.app_secret.secret_name
+}
 

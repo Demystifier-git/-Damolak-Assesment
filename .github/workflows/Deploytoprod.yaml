@@ -33,7 +33,7 @@ jobs:
       - name: Run basic tests
         run: |
           echo "Running basic validation..."
-          test -f docker-compose.yml
+          test -f docker-compose.yaml
           echo "Tests passed."
 
       # Configure AWS credentials using OIDC

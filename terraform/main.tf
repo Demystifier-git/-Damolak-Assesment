@@ -143,3 +143,42 @@ module "rds" {
   instance_class    = var.db_instance_class
   allocated_storage = var.db_allocated_storage
 }
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  repository_name      = var.ecr_repository_name
+  image_tag_mutability = var.ecr_image_tag_mutability
+  scan_on_push         = var.ecr_scan_on_push
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+module "app_secret" {
+  source = "./modules/secrets-manager"
+
+  secret_name             = var.secret_name
+  description             = var.secret_description
+  recovery_window_in_days = var.secret_recovery_window_in_days
+
+  secret_string = jsonencode({
+    GRAFANA_ADMIN_USER     = var.grafana_admin_user
+    GRAFANA_ADMIN_PASSWORD = var.grafana_admin_password
+    GRAFANA_ROOT_URL       = var.grafana_root_url
+
+    SMTP_HOST     = var.smtp_host
+    SMTP_USER     = var.smtp_user
+    SMTP_PASSWORD = var.smtp_password
+    SMTP_FROM     = var.smtp_from
+
+    APP_ENV = var.environment
+  })
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+  }
+}

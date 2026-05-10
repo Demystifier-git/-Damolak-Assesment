@@ -98,3 +98,79 @@ variable "db_name" {
   description = "Name of database"
   type        = string
 }
+
+variable "environment" {
+  description = "Deployment environment"
+  type        = string
+}
+
+variable "project_name" {
+  description = "Project name"
+  type        = string
+}
+
+# =========================
+# ECR Variables
+# =========================
+variable "ecr_repository_name" {
+  description = "Name of the ECR repository"
+  type        = string
+}
+
+variable "ecr_image_tag_mutability" {
+  description = "Whether image tags are mutable or immutable"
+  type        = string
+}
+
+variable "ecr_scan_on_push" {
+  description = "Enable image scanning on push"
+  type        = bool
+}
+
+# =========================
+# Secrets Manager Variables
+# =========================
+variable "secret_name" {
+  description = "Name of the application secret"
+  type        = string
+}
+
+variable "secret_description" {
+  description = "Description of the secret"
+  type        = string
+}
+
+variable "secret_recovery_window_in_days" {
+  description = "Recovery window before secret deletion"
+  type        = number
+}
+
+variable "grafana_admin_user" {
+  type = string
+}
+
+variable "grafana_admin_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "grafana_root_url" {
+  type = string
+}
+
+variable "smtp_host" {
+  type = string
+}
+
+variable "smtp_user" {
+  type = string
+}
+
+variable "smtp_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "smtp_from" {
+  type = string
+}
