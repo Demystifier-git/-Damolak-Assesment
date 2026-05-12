@@ -1,238 +1,304 @@
-#  Damolak Assesment
+# Damolak Assessment
 
-#  MiniShop – Production-Ready DevOps Deployment
+# MiniShop – Production-Ready DevOps Deployment
 
-##  Overview
+## Overview
 
 MiniShop is a containerized full-stack application designed to demonstrate real-world DevOps practices, including:
 
 - Docker-based microservice-style architecture
-- CI/CD-ready structure
-- Observability (metrics, logs, tracing)
-- Monitoring with Prometheus and Grafana (otel-collector added to export metrics to prometheus)
-- Centralized logging with Loki + Promtail
+- CI/CD-ready project structure
+- Observability (metrics, logs, and tracing)
+- Monitoring with Prometheus and Grafana
+- OpenTelemetry Collector for telemetry export
+- Centralized logging with Loki and Promtail
 - Backend instrumentation using FastAPI middleware
-- Amazon documentdb for data persistence
-- ACM to get ssl certificate for https configuration
-
+- Amazon RDS for MySQL data persistence
+- AWS Secrets Manager for secure credential storage
+- AWS Certificate Manager (ACM) for HTTPS certificates
 
 ---
 
-#  Architecture
+## Architecture
 
+```text
 Internet
    ↓
-Load Balancer (VM)
+Application Load Balancer (HTTPS)
    ↓
 ------------------------------------------------
-VM (Docker Host)
+EC2 VM (Docker Host)
  ├── Frontend (Nginx - :80)
  ├── Backend (FastAPI - :8000)
- ├── MongoDB
  ├── Prometheus (:9090)
  ├── Grafana (:3001)
  ├── Loki (:3100)
  ├── Promtail
  └── OpenTelemetry Collector (:4317/:4318)
 ------------------------------------------------
+   ↓
+Amazon RDS for MySQL (Private Subnet)
+```
 
 ---
 
-#  Services
+## Services
 
-##  Frontend
-Static website served via Nginx.
+### Frontend
 
-URL:
+Static website served through Nginx.
+
+**URL:**  
 https://delightdavid.online
 
 ---
 
-##  Backend (FastAPI)
+### Backend (FastAPI)
 
-REST API with observability instrumentation.
+REST API with built-in observability instrumentation.
 
-### Endpoints
+#### Endpoints
 
-Health Check:
-GET /health
+##### Health Check
 
-Metrics (Prometheus):
-GET /metrics
+- `GET /health`
 
-Products:
-GET    /products
-POST   /products
-PUT    /products/{id}
-DELETE /products/{id}
+##### Metrics (Prometheus)
 
-Users:
-POST /users/register
-POST /users/login
-GET  /users/me
+- `GET /metrics`
 
-Base URL:
+##### Products
+
+- `GET /products`
+- `POST /products`
+- `PUT /products/{id}`
+- `DELETE /products/{id}`
+
+##### Users
+
+- `POST /users/register`
+- `POST /users/login`
+- `GET /users/me`
+
+**Base URL:**  
 https://delightdavid.online
 
 ---
 
-##  Database (MongoDB)
+### Database (Amazon RDS for MySQL)
 
-- Stores application data
-- Initialized using Docker init scripts
-- Persistent volume storage enabled
+- Managed MySQL database hosted on Amazon RDS
+- Stores users, products, orders, and application data
+- Deployed in private subnets for enhanced security
+- Automated backups and snapshots enabled
+- Multi-AZ deployment supported for high availability
+- Credentials securely retrieved from AWS Secrets Manager
 
 ---
 
-##  Prometheus
+### Prometheus
 
-- Scrapes backend metrics
-- Collects HTTP request stats, latency, and system metrics
+- Scrapes backend and OpenTelemetry Collector metrics
+- Collects HTTP request statistics, latency, and system metrics
 
-URL:
+**URL:**  
 https://prometheus.delightdavid.online
 
 ---
 
-##  Grafana
+### Grafana
 
 - Visualizes metrics from Prometheus
 - Displays logs from Loki
+- Provides operational dashboards and alerts
 
-URL:
+**URL:**  
 https://grafana.delightdavid.online
 
 ---
 
-##  Loki
+### Loki
 
 - Centralized log storage system
-- Receives logs via Promtail
-- Queried inside Grafana using LogQL
+- Receives logs from Promtail
+- Queried through Grafana using LogQL
 
 ---
 
-##  Promtail
+### Promtail
 
-- Collects logs from Docker containers
-- Sends logs to Loki for storage and querying
-
----
-
-##  OpenTelemetry Collector
-
-- Receives telemetry data (metrics/traces)
-- Exposes metrics for Prometheus
-- Supports gRPC and HTTP ingestion
+- Collects Docker container logs
+- Ships logs to Loki
 
 ---
 
-#  Observability Flow
+### OpenTelemetry Collector
 
-## Metrics Flow
-Backend → /metrics → Prometheus → Grafana
-
-## Logs Flow
-Containers → Promtail → Loki → Grafana
+- Receives telemetry data from the backend
+- Processes and exports metrics to Prometheus
+- Supports both gRPC and HTTP ingestion
 
 ---
 
-#  Run the Project
+## Observability Flow
 
-## 1. Clone repository
+### Metrics Flow
+
+```text
+FastAPI Backend
+      ↓
+OpenTelemetry Collector
+      ↓
+Prometheus
+      ↓
+Grafana
+```
+
+### Logs Flow
+
+```text
+Docker Containers
+      ↓
+Promtail
+      ↓
+Loki
+      ↓
+Grafana
+```
+
+---
+
+## Run the Project
+
+### 1. Clone the Repository
+
+```bash
 git clone <repo-url>
 cd project
+```
 
-## 2. Setup environment
+### 2. Configure Environment Variables
+
+```bash
 cp .env.example .env
+```
 
-## 3. Start services
-docker compose up --build
+Update `.env` with:
+
+- RDS endpoint
+- MySQL database name
+- Secrets Manager secret name
+- AWS region
+
+### 3. Start Services
+
+```bash
+docker compose up --build -d
+```
 
 ---
 
-#  Access URLs
+## Access URLs
 
-Application:     https://delightdavid.online
-Prometheus:   https://prometheus.delightdavid.online 
-Grafana:      http://grafana.delightdavid.online 
+| Service | URL |
+|--------|-----|
+| Application | https://delightdavid.online |
+| Prometheus | https://prometheus.delightdavid.online |
+| Grafana | https://grafana.delightdavid.online |
 
 ---
 
-#  Metrics Collected
+## Metrics Collected
 
 The backend exposes the following Prometheus metrics:
 
-- http_requests_total
-- http_request_duration_seconds
-- in_progress_requests
-
-#  CI/CD
-
-
-- Build
-- test
-- deploy
+- `http_requests_total`
+- `http_request_duration_seconds`
+- `in_progress_requests`
+- `python_gc_objects_collected_total`
+- `process_cpu_seconds_total`
+- `process_resident_memory_bytes`
 
 ---
 
-#  Logging
+## CI/CD Pipeline
+
+Implemented using GitHub Actions.
+
+### Pipeline Stages
+
+1. Build Docker images
+2. Run automated tests
+3. Push images to container registry
+4. Deploy to EC2 via AWS Systems Manager Run Command
+5. Perform health checks
+6. Support rollback to previous version
+
+---
+
+## Logging
 
 Logs are collected using:
 
 - Docker container logs
 - Promtail log shipper
-- Loki storage backend
+- Loki log storage
 - Grafana visualization
 
-Example LogQL query:
+### Example LogQL Query
 
+```logql
 {job="docker-containers"}
+```
 
 ---
 
-#  Security Notes
+## Security Notes
 
-- Amazondocumentdb was used as the database with env variables stored in secret manager
-- Internal Docker networking used for service communication
-- No direct public exposure of Loki or internal services
-- Observability stack accessed via Grafana only
+- Amazon RDS is deployed in private subnets with no public access
+- Database credentials are stored in AWS Secrets Manager
+- Security groups restrict database access to the backend host only
+- Internal Docker networking is used for service-to-service communication
+- HTTPS is enabled using certificates from AWS Certificate Manager
+- IAM roles are used instead of hardcoded AWS credentials
 
 ---
 
-
-
-#  DevOps Concepts Demonstrated
+## DevOps Concepts Demonstrated
 
 - Docker containerization
-- Multi-service orchestration
-- Observability (metrics, logs)
-- Prometheus monitoring
-- Grafana visualization
-- Centralized logging (Loki + Promtail)
-- FastAPI middleware instrumentation
-- Production-style architecture design
-- Autoscaling implemented
-- Infrastructure provisioned with terrafrom with remotestate backend configured
-- https configured for application as well as prometheus and grafana
-- Loadbalancer configured to route application traffic
-- VPC setup for secure Networking
+- Multi-service orchestration with Docker Compose
+- Infrastructure as Code using Terraform
+- Remote Terraform state management
+- Secure VPC design with public and private subnets
+- Application Load Balancer configuration
+- HTTPS termination with AWS Certificate Manager
+- Managed database deployment with Amazon RDS for MySQL
+- Secrets management with AWS Secrets Manager
+- CI/CD with GitHub Actions
+- Monitoring with Prometheus and Grafana
+- Centralized logging with Loki and Promtail
+- OpenTelemetry instrumentation
+- Auto Scaling implementation
 
 ---
 
-#  Summary
+## Summary
 
-This project simulates a production-grade DevOps environment with:
+This project simulates a production-grade DevOps environment featuring:
 
-- Scalable architecture
-- Full observability stack
-- Modular service design
-- Cloud-native monitoring practices
+- Scalable and secure cloud architecture
+- Managed MySQL database on Amazon RDS
+- Full observability stack (metrics, logs, and tracing)
+- Automated CI/CD deployment pipeline
+- Infrastructure as Code with Terraform
+- HTTPS-enabled applications and monitoring endpoints
 
 ---
 
-#  Author
+## Author
 
-Chukwuagoziem delight david, DevOps Engineer Practical Challenge Submission.
+**Chukwuagoziem Delight David**  
+DevOps Engineer Practical Challenge Submission.
 
 

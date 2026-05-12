@@ -1,14 +1,16 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Starting environment variable bootstrap..."
+echo "🚀 Starting Secrets Manager bootstrap..."
 
 SECRET_ID="grafana/prod"
 REGION="us-east-1"
 
-# -----------------------------
-# FETCH SECRET
-# -----------------------------
+
+command -v aws >/dev/null 2>&1 || { echo "AWS CLI not installed"; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo "jq not installed"; exit 1; }
+
+
 SECRET=$(aws secretsmanager get-secret-value \
   --secret-id "$SECRET_ID" \
   --region "$REGION" \
@@ -17,22 +19,25 @@ SECRET=$(aws secretsmanager get-secret-value \
 
 echo "🔐 Secrets fetched successfully"
 
-# -----------------------------
-# EXPORT ENV VARS
-# -----------------------------
-export GRAFANA_ADMIN_USER=$(echo "$SECRET" | jq -r '.GRAFANA_ADMIN_USER')
-export GRAFANA_ADMIN_PASSWORD=$(echo "$SECRET" | jq -r '.GRAFANA_ADMIN_PASSWORD')
-export GRAFANA_ROOT_URL=$(echo "$SECRET" | jq -r '.GRAFANA_ROOT_URL')
 
-export SMTP_HOST=$(echo "$SECRET" | jq -r '.SMTP_HOST')
-export SMTP_USER=$(echo "$SECRET" | jq -r '.SMTP_USER')
-export SMTP_PASSWORD=$(echo "$SECRET" | jq -r '.SMTP_PASSWORD')
-export SMTP_FROM=$(echo "$SECRET" | jq -r '.SMTP_FROM')
+cat <<EOF > .env
+GRAFANA_ADMIN_USER=$(echo "$SECRET" | jq -r '.GRAFANA_ADMIN_USER')
+GRAFANA_ADMIN_PASSWORD=$(echo "$SECRET" | jq -r '.GRAFANA_ADMIN_PASSWORD')
+GRAFANA_ROOT_URL=$(echo "$SECRET" | jq -r '.GRAFANA_ROOT_URL')
+
+SMTP_HOST=$(echo "$SECRET" | jq -r '.SMTP_HOST')
+SMTP_USER=$(echo "$SECRET" | jq -r '.SMTP_USER')
+SMTP_PASSWORD=$(echo "$SECRET" | jq -r '.SMTP_PASSWORD')
+SMTP_FROM=$(echo "$SECRET" | jq -r '.SMTP_FROM')
+EOF
+
+echo "📦 .env file created"
 
 
+cd /app || exit 1
 
-sudo -i
-git pull
-docker compose up -d
+git pull origin main
 
-echo "✅ Grafana is running"
+docker compose --env-file .env up -d --build
+
+echo " Grafana is running successfully"

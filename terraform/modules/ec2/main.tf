@@ -35,7 +35,29 @@ resource "aws_instance" "this" {
   vpc_security_group_ids = var.security_group_ids
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
+    # Run bootstrap script on first boot
+  user_data = file("${path.module}/bootstrap.sh")
+
   tags = {
     Name = var.name
   }
+}
+
+
+# ECR Access (pull images)
+resource "aws_iam_role_policy_attachment" "ec2_ecr_attach" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+# Secrets Manager Access
+resource "aws_iam_role_policy_attachment" "ec2_secrets_attach" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+}
+
+# RDS Read Access
+resource "aws_iam_role_policy_attachment" "ec2_rds_attach" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess"
 }
