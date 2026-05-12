@@ -22,6 +22,10 @@ MiniShop is a containerized full-stack application designed to demonstrate real-
 - IAM roles and policies are used to securely authenticate to ECR without hardcoded credentials.
 - Image versioning and tagging (`semver style` and commit SHA) enable easy rollbacks and consistent deployments.
 - ECR provides a secure, highly available, and fully managed solution for container image storage.
+- Implemented AWS authentication in GitHub Actions using OpenID Connect (OIDC), allowing secure, passwordless access to AWS services.
+- Eliminated the use of long-lived AWS access keys by using temporary credentials issued via AWS STS.
+- Configured an IAM role with a trust relationship to GitHub’s OIDC provider for least-privilege access.
+- Enabled secure CI/CD deployments to AWS services like EC2 (SSM) and Amazon ECR without storing sensitive credentials in GitHub Secrets.
 
 ---
 
