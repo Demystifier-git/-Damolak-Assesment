@@ -8,6 +8,11 @@ on:
         required: true
         default: "main"
 
+      version:
+        description: "Semantic version tag (example: v1.0.0)"
+        required: true
+        default: "v1.0.0"
+
 permissions:
   id-token: write
   contents: read
@@ -16,9 +21,12 @@ env:
   AWS_REGION: us-east-1
   INSTANCE_ID: ${{ secrets.PROD_INSTANCE_ID }}
 
+  ECR_BACKEND_REPO: minishop-backend
+  ECR_FRONTEND_REPO: minishop-frontend
+
 jobs:
   deploy:
-    name: Build, Test and Deploy to Private EC2
+    name: Build, Push to ECR and Deploy
     runs-on: ubuntu-latest
     environment: production
 
@@ -29,7 +37,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      # Basic test (customize as needed)
+      # Basic test
       - name: Run basic tests
         run: |
           echo "Running basic validation..."
@@ -43,6 +51,43 @@ jobs:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # Login to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Set image variables
+      - name: Set image variables
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+
+      # Build Backend Image
+      - name: Build backend image
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_BACKEND_REPO:$VERSION ./backend
+          docker tag $ECR_REGISTRY/$ECR_BACKEND_REPO:$VERSION \
+                     $ECR_REGISTRY/$ECR_BACKEND_REPO:latest
+
+      # Build Frontend Image
+      - name: Build frontend image
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_FRONTEND_REPO:$VERSION ./frontend
+          docker tag $ECR_REGISTRY/$ECR_FRONTEND_REPO:$VERSION \
+                     $ECR_REGISTRY/$ECR_FRONTEND_REPO:latest
+
+      # Push Backend Image
+      - name: Push backend image to ECR
+        run: |
+          docker push $ECR_REGISTRY/$ECR_BACKEND_REPO:$VERSION
+          docker push $ECR_REGISTRY/$ECR_BACKEND_REPO:latest
+
+      # Push Frontend Image
+      - name: Push frontend image to ECR
+        run: |
+          docker push $ECR_REGISTRY/$ECR_FRONTEND_REPO:$VERSION
+          docker push $ECR_REGISTRY/$ECR_FRONTEND_REPO:latest
+
       # Deploy to private EC2 using AWS Systems Manager (SSM)
       - name: Deploy application via SSM
         run: |
@@ -52,13 +97,11 @@ jobs:
             --comment "Production deployment from GitHub Actions" \
             --parameters 'commands=[
               "set -e",
+              "aws ecr get-login-password --region '${{ env.AWS_REGION }}' | docker login --username AWS --password-stdin '${{ env.ECR_REGISTRY }}'",
               "cd /app",
-              "git fetch origin",
-              "git checkout '${{ github.event.inputs.branch }}'",
-              "git reset --hard origin/'${{ github.event.inputs.branch }}'",
-              "docker compose pull || true",
-              "docker compose up -d --build",
-              "docker image prune -f"
+              "docker compose pull",
+              "docker compose up -d",
+              "docker image prune -af"
             ]' \
             --query 'Command.CommandId' \
             --output text)

@@ -20,7 +20,7 @@ MiniShop is a containerized full-stack application designed to demonstrate real-
 - GitHub Actions builds the frontend and backend Docker images and pushes them to ECR.
 - The EC2 deployment server pulls the latest images directly from ECR during deployment.
 - IAM roles and policies are used to securely authenticate to ECR without hardcoded credentials.
-- Image versioning and tagging (`semver versioning` and commit SHA) enable easy rollbacks and consistent deployments.
+- Image versioning and tagging (`semver style` and commit SHA) enable easy rollbacks and consistent deployments.
 - ECR provides a secure, highly available, and fully managed solution for container image storage.
 
 ---

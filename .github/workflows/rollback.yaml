@@ -1,10 +1,10 @@
-name: Production Rollback on Private EC2
+name: Production Rollback via ECR (SemVer Only)
 
 on:
   workflow_dispatch:
     inputs:
-      git_commit:
-        description: "Commit SHA to roll back to"
+      version:
+        description: "Semantic version to rollback to (e.g. v1.0.0)"
         required: true
 
 permissions:
@@ -15,39 +15,59 @@ env:
   AWS_REGION: us-east-1
   INSTANCE_ID: ${{ secrets.PROD_INSTANCE_ID }}
 
+  ECR_BACKEND_REPO: minishop-backend
+  ECR_FRONTEND_REPO: minishop-frontend
+
 jobs:
   rollback:
-    name: Rollback Production Deployment
+    name: Rollback Using SemVer ECR Images
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      # Checkout repository
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      # Configure AWS credentials using OIDC
+      # Configure AWS credentials (OIDC)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Roll back to a specific commit using SSM
-      - name: Rollback application via SSM
+      # Login to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Set version variable
+      - name: Set rollback version
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+
+      # Deploy rollback via SSM (SemVer images only)
+      - name: Deploy rollback via SSM
         run: |
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
-            --comment "Production rollback from GitHub Actions" \
-            --parameters 'commands=[
-              "set -e",
-              "cd /app",
-              "git fetch --all",
-              "git checkout '${{ github.event.inputs.git_commit }}'",
-              "docker compose up -d --build",
-              "docker image prune -f"
-            ]' \
+            --comment "Rollback using SemVer ECR images" \
+            --parameters "commands=[
+              \"set -e\",
+
+              \"aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY\",
+
+              \"echo Rolling back to version: $VERSION\",
+
+              \"docker pull $ECR_REGISTRY/$ECR_BACKEND_REPO:$VERSION\",
+              \"docker pull $ECR_REGISTRY/$ECR_FRONTEND_REPO:$VERSION\",
+
+              \"docker stop backend frontend || true\",
+              \"docker rm backend frontend || true\",
+
+              \"docker run -d --name backend -p 8000:8000 $ECR_REGISTRY/$ECR_BACKEND_REPO:$VERSION\",
+              \"docker run -d --name frontend -p 80:80 $ECR_REGISTRY/$ECR_FRONTEND_REPO:$VERSION\",
+
+              \"docker image prune -f\"
+            ]" \
             --query 'Command.CommandId' \
             --output text)
 
