@@ -16,6 +16,12 @@ MiniShop is a containerized full-stack application designed to demonstrate real-
 - Amazon RDS for MySQL data persistence
 - AWS Secrets Manager for secure credential storage
 - AWS Certificate Manager (ACM) for HTTPS certificates
+- Amazon Elastic Container Registry (ECR) was used as the private container registry for storing Docker images.
+- GitHub Actions builds the frontend and backend Docker images and pushes them to ECR.
+- The EC2 deployment server pulls the latest images directly from ECR during deployment.
+- IAM roles and policies are used to securely authenticate to ECR without hardcoded credentials.
+- Image versioning and tagging (`semver versioning` and commit SHA) enable easy rollbacks and consistent deployments.
+- ECR provides a secure, highly available, and fully managed solution for container image storage.
 
 ---
 
