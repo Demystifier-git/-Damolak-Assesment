@@ -182,3 +182,10 @@ module "app_secret" {
     Environment = var.environment
   }
 }
+
+module "tf_state_backend" {
+  source = "../modules/tf_state_backend"
+
+  project_name = var.project_name
+  environment  = var.environment
+}

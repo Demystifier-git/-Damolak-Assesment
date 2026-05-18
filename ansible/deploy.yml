@@ -1,0 +1,83 @@
+---
+- name: Production deployment with runtime secrets (no .env file)
+  hosts: local
+  become: true
+
+  vars:
+    repo_url: https://github.com/YOUR_USERNAME/Damolak_Assesment.git
+    repo_branch: main
+    app_dir: /opt/minishop
+    aws_region: us-east-1
+    secret_name: minishop/prod
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install required packages (Docker, Git, Python tools)
+      ansible.builtin.apt:
+        name:
+          - git
+          - docker.io
+          - docker-compose-plugin
+          - python3-pip
+        state: present
+
+    - name: Install AWS SDK for Ansible Secrets Manager lookup
+      ansible.builtin.pip:
+        name:
+          - boto3
+          - botocore
+        executable: pip3
+
+    - name: Ensure Docker service is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Ensure application directory exists
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Fetch secrets from AWS Secrets Manager
+      ansible.builtin.set_fact:
+        app_secrets: "{{ lookup('amazon.aws.aws_secret', secret_name, region=aws_region) }}"
+
+    - name: Clone or update application repository
+      ansible.builtin.git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        version: "{{ repo_branch }}"
+        force: true
+        update: true
+
+    - name: Deploy application with runtime environment variables (NO .env file)
+      ansible.builtin.shell: |
+        export DB_USER={{ app_secrets.DB_USER }}
+        export DB_PASSWORD={{ app_secrets.DB_PASSWORD }}
+        export DB_HOST={{ app_secrets.DB_HOST }}
+        export DB_NAME={{ app_secrets.DB_NAME }}
+
+        docker compose up -d --build
+      args:
+        chdir: "{{ app_dir }}"
+      register: compose_output
+
+    - name: Show deployment output
+      ansible.builtin.debug:
+        var: compose_output.stdout_lines
+
+    - name: Verify running containers
+      ansible.builtin.command:
+        cmd: docker ps
+      register: containers
+      changed_when: false
+
+    - name: Show running containers
+      ansible.builtin.debug:
+        var: containers.stdout_lines
