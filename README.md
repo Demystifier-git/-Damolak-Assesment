@@ -27,6 +27,7 @@ MiniShop is a containerized full-stack application designed to demonstrate real-
 - Configured an IAM role with a trust relationship to GitHub’s OIDC provider for least-privilege access.
 - Enabled secure CI/CD deployments to AWS services like EC2 (SSM) and Amazon ECR without storing sensitive credentials in GitHub Secrets.
 
+
 ---
 
 ## Architecture
@@ -243,6 +244,42 @@ Implemented using GitHub Actions.
 4. Deploy to EC2 via AWS Systems Manager Run Command
 5. Perform health checks
 6. Support rollback to previous version
+
+
+# Infrastructure Pipeline Overview
+
+## Terraform (Infrastructure as Code)
+
+- Used to provision and manage AWS infrastructure in a declarative way  
+- Defines resources such as VPC, subnets, EC2 instances, security groups, RDS, and Auto Scaling groups  
+- Pipeline steps include:
+  - Terraform init to configure backend and download providers  
+  - Terraform validate and plan to check configuration and preview changes  
+  - Terraform apply to create or update infrastructure in AWS  
+- Uses remote state storage in S3 for consistency across runs  
+- Uses DynamoDB for state locking to prevent concurrent modifications  
+- Ensures infrastructure is version-controlled, repeatable, and auditable  
+
+## Ansible (Configuration Management)
+
+- Used to configure servers after Terraform provisions infrastructure  
+- Runs in an agentless mode using SSH  
+- Responsibilities include:
+  - Installing required packages such as Docker, Git, and runtime dependencies  
+  - Configuring system settings and environment variables  
+  - Deploying application code or pulling container images from ECR  
+  - Managing services using systemd or Docker Compose  
+  - Applying configuration updates without rebuilding infrastructure  
+- Uses inventory files to define target servers  
+- Uses playbooks to define desired system state  
+
+## CI/CD Pipeline Flow
+
+- Code is pushed to GitHub repository  
+- Pipeline is triggered with manual approval 
+- Terraform provisions or updates AWS infrastructure  
+- Ansible configures the provisioned servers  
+- Application is deployed and becomes available through the infrastructure stack  
 
 ---
 
