@@ -256,9 +256,12 @@ Implemented using GitHub Actions.
   - Terraform init to configure backend and download providers  
   - Terraform validate and plan to check configuration and preview changes  
   - Terraform apply to create or update infrastructure in AWS  
+  - Drift detection
+  - pipeline notifies and fails if any resource is to be deleted
 - Uses remote state storage in S3 for consistency across runs  
 - Uses DynamoDB for state locking to prevent concurrent modifications  
 - Ensures infrastructure is version-controlled, repeatable, and auditable  
+
 
 ## Ansible (Configuration Management)
 
